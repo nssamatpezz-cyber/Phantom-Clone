@@ -54,9 +54,19 @@ jobs:
           echo "=== Swift package configuration ==="
           grep -n -E 'XCRemoteSwiftPackageReference|XCSwiftPackageProductDependency|packageProductDependencies' \
             Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
+      
+      - name: Resolve Swift packages
+        run: |
+          echo "=== Swift package configuration ==="
+          find Youtube_Phantom_clone.xcodeproj -name Package.resolved -print
+
+          echo "=== Resolve packages with xcodebuild ==="
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project "Youtube_Phantom_clone.xcodeproj"
+
 
       - name: List Xcode schemes
-        continue-on-error: true
         run: |
           xcodebuild -list \
             -project "Youtube_Phantom_clone.xcodeproj"
