@@ -62,16 +62,19 @@ jobs:
             -project "Youtube_Phantom_clone.xcodeproj"
 
       
+      
       - name: Build unsigned iOS app
         run: |
           set -o pipefail
           xcodebuild \
+            -disableAutomaticPackageResolution \
             -project "Youtube_Phantom_clone.xcodeproj" \
             -target "Youtube_Phantom_clone" \
             -configuration Release \
             -sdk iphoneos \
             CODE_SIGNING_ALLOWED=NO \
             build
+
 
 
       - name: Package unsigned IPA
