@@ -34,7 +34,9 @@ jobs:
             Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
 
 
+      
       - name: List Xcode schemes
+        continue-on-error: true
         run: |
           xcodebuild -list \
             -project "Youtube_Phantom_clone.xcodeproj"
