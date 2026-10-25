@@ -17,22 +17,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode 16.3
+      - name: Select Xcode
         run: |
           set -euxo pipefail
           sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
           xcode-select -p
           xcodebuild -version
 
-      - name: Verify project files
+      - name: Verify project
         run: |
           set -euxo pipefail
-          ls -la
           test -d "Youtube_Phantom_clone.xcodeproj"
-          test -d "Youtube_Phantom_clone"
           test -f "Youtube_Phantom_clone.xcodeproj/project.pbxproj"
+          ls -la
 
-      - name: Build unsigned iOS app
+      - name: Build unsigned app
         run: |
           set -o pipefail
           xcodebuild \
@@ -49,18 +48,15 @@ jobs:
       - name: Package unsigned IPA
         run: |
           set -euxo pipefail
-
           APP="$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/Youtube_Phantom_clone.app"
           IPA="$GITHUB_WORKSPACE/Youtube-Phantom-Clone-unsigned.ipa"
 
           test -d "$APP"
-
           mkdir -p "$RUNNER_TEMP/ipa/Payload"
           cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/"
 
           cd "$RUNNER_TEMP/ipa"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent \
-            Payload "$IPA"
+          /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload "$IPA"
 
           test -f "$IPA"
           ls -lh "$IPA"
