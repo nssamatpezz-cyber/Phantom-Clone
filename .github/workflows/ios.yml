@@ -41,6 +41,7 @@ jobs:
           xcodebuild -list \
             -project "Youtube_Phantom_clone.xcodeproj"
 
+      
       - name: Build unsigned iOS app
         run: |
           set -o pipefail
@@ -49,9 +50,9 @@ jobs:
             -target "Youtube_Phantom_clone" \
             -configuration Release \
             -sdk iphoneos \
-            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             build
+
 
       - name: Package unsigned IPA
         run: |
