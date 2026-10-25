@@ -21,22 +21,19 @@ jobs:
         run: |
           set -euxo pipefail
           sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
-          xcode-select -p
           xcodebuild -version
 
-      - name: Verify project
+      - name: Find Xcode scheme
         run: |
           set -euxo pipefail
-          test -d "Youtube_Phantom_clone.xcodeproj"
-          test -f "Youtube_Phantom_clone.xcodeproj/project.pbxproj"
-          ls -la
+          xcodebuild -list -project "Youtube_Phantom_clone.xcodeproj"
 
       - name: Build unsigned app
         run: |
           set -o pipefail
           xcodebuild \
             -project "Youtube_Phantom_clone.xcodeproj" \
-            -target "Youtube_Phantom_clone" \
+            -scheme "Youtube_Phantom_clone" \
             -configuration Release \
             -sdk iphoneos \
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
@@ -68,4 +65,3 @@ jobs:
           path: Youtube-Phantom-Clone-unsigned.ipa
           if-no-files-found: error
           retention-days: 7
-
