@@ -21,6 +21,7 @@ jobs:
           test -d "Youtube_Phantom_clone.xcodeproj"
           xcodebuild -version
 
+
       - name: Build unsigned iOS app
         run: |
           set -o pipefail
@@ -32,6 +33,7 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             build
+
 
       - name: Package unsigned IPA
         run: |
