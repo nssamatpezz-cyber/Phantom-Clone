@@ -55,14 +55,22 @@ jobs:
           grep -n -E 'XCRemoteSwiftPackageReference|XCSwiftPackageProductDependency|packageProductDependencies' \
             Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
       
+      
       - name: Resolve Swift packages
         run: |
-          echo "=== Swift package configuration ==="
-          find Youtube_Phantom_clone.xcodeproj -name Package.resolved -print
+          set -euxo pipefail
 
-          echo "=== Resolve packages with xcodebuild ==="
+          echo "=== Verify pinned dependency ==="
+          cat "Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+
+          echo "=== Create isolated package directory ==="
+          mkdir -p "$RUNNER_TEMP/SourcePackages"
+
+          echo "=== Resolve using system Git ==="
           xcodebuild \
             -resolvePackageDependencies \
+            -scmProvider system \
+            -clonedSourcePackagesDirPath "$RUNNER_TEMP/SourcePackages" \
             -project "Youtube_Phantom_clone.xcodeproj"
 
 
