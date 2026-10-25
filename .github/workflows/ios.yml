@@ -9,11 +9,18 @@ on:
 
 jobs:
   build:
-    runs-on: macos-15
+    runs-on: macos-14
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+      
+      - name: Clear Swift package caches
+        run: |
+          rm -rf ~/Library/Caches/org.swift.swiftpm
+          rm -rf ~/Library/org.swift.swiftpm
+          rm -rf ~/Library/Developer/Xcode/DerivedData
+
 
       - name: Check project files
         run: |
