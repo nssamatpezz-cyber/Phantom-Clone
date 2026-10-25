@@ -35,6 +35,19 @@ jobs:
 
 
       
+      - name: Inspect project package configuration
+        run: |
+          echo "=== Package.resolved locations ==="
+          find . -name Package.resolved -not -path '*/.git/*' -print
+
+          echo "=== Kingfisher references ==="
+          grep -n -i -C 3 kingfisher \
+            Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
+
+          echo "=== Swift package configuration ==="
+          grep -n -E 'XCRemoteSwiftPackageReference|XCSwiftPackageProductDependency|packageProductDependencies' \
+            Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
+
       - name: List Xcode schemes
         continue-on-error: true
         run: |
