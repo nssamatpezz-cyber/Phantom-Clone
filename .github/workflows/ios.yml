@@ -1,4 +1,5 @@
-name: Build Unsigned iOS IPA
+```yaml
+name: Diagnose iOS Project
 
 on:
   workflow_dispatch:
@@ -10,67 +11,35 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  diagnose:
     runs-on: macos-15
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Select Xcode
+      - name: Inspect project configuration
         run: |
           set -euxo pipefail
-          sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
-          xcodebuild -version
 
-      
-      - name: Inspect project package references
-        run: |
-          set -euxo pipefail
-          grep -n -E 'objectVersion|XCRemoteSwiftPackageReference|XCSwiftPackageProductDependency|packageProductDependencies|repositoryURL|Kingfisher' \
-            Youtube_Phantom_clone.xcodeproj/project.pbxproj
-          git status --short
+          echo "=== Commit ==="
           git log -1 --oneline
 
-      - name: Find Xcode scheme
-        run: |
-          set -euxo pipefail
-          xcodebuild -list -project "Youtube_Phantom_clone.xcodeproj"
+          echo "=== Xcode ==="
+          xcode-select -p
+          xcodebuild -version
 
-      - name: Build unsigned app
-        run: |
-          set -o pipefail
-          xcodebuild \
-            -project "Youtube_Phantom_clone.xcodeproj" \
-            -scheme "Youtube_Phantom_clone" \
-            -configuration Release \
-            -sdk iphoneos \
-            -derivedDataPath "$RUNNER_TEMP/DerivedData" \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_IDENTITY="" \
-            build
+          echo "=== Project format ==="
+          grep -n -E 'objectVersion|preferredProjectObjectVersion|minimizedProjectReferenceProxies' \
+            Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
 
-      - name: Package unsigned IPA
-        run: |
-          set -euxo pipefail
-          APP="$RUNNER_TEMP/DerivedData/Build/Products/Release-iphoneos/Youtube_Phantom_clone.app"
-          IPA="$GITHUB_WORKSPACE/Youtube-Phantom-Clone-unsigned.ipa"
+          echo "=== Package references ==="
+          grep -n -E 'XCRemoteSwiftPackageReference|XCSwiftPackageProductDependency|packageProductDependencies|repositoryURL|Kingfisher' \
+            Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
 
-          test -d "$APP"
-          mkdir -p "$RUNNER_TEMP/ipa/Payload"
-          cp -R "$APP" "$RUNNER_TEMP/ipa/Payload/"
+          echo "=== Package.resolved ==="
+          cat "Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
 
-          cd "$RUNNER_TEMP/ipa"
-          /usr/bin/ditto -c -k --sequesterRsrc --keepParent Payload "$IPA"
-
-          test -f "$IPA"
-          ls -lh "$IPA"
-
-      - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Youtube-Phantom-Clone-unsigned-IPA
-          path: Youtube-Phantom-Clone-unsigned.ipa
-          if-no-files-found: error
-          retention-days: 7
+          echo "=== Working tree ==="
+          git status --short
+```
