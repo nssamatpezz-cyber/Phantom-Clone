@@ -17,27 +17,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Inspect project configuration
+      - name: Check project syntax and package URL
         run: |
           set -euxo pipefail
 
-          echo "=== Commit ==="
-          git log -1 --oneline
+          echo "=== Project file syntax ==="
+          plutil -lint Youtube_Phantom_clone.xcodeproj/project.pbxproj
 
-          echo "=== Xcode ==="
-          xcode-select -p
-          xcodebuild -version
+          echo "=== Exact package reference ==="
+          sed -n '335,355p' Youtube_Phantom_clone.xcodeproj/project.pbxproj
 
-          echo "=== Project format ==="
-          grep -n -E 'objectVersion|preferredProjectObjectVersion|minimizedProjectReferenceProxies' \
-            Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
+          echo "=== Package lock file syntax ==="
+          plutil -lint -s -r \
+            Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved \
+            || python3 -m json.tool \
+            Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
-          echo "=== Package references ==="
-          grep -n -E 'XCRemoteSwiftPackageReference|XCSwiftPackageProductDependency|packageProductDependencies|repositoryURL|Kingfisher' \
-            Youtube_Phantom_clone.xcodeproj/project.pbxproj || true
+          echo "=== Package reference occurrences ==="
+          grep -n 'repositoryURL' Youtube_Phantom_clone.xcodeproj/project.pbxproj
 
-          echo "=== Package.resolved ==="
-          cat "Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
-
-          echo "=== Working tree ==="
-          git status --short
