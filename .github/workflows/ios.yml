@@ -20,13 +20,11 @@ jobs:
           ls -la
           test -d "Youtube_Phantom_clone.xcodeproj"
           xcodebuild -version
-      
+
       - name: List Xcode schemes
         run: |
           xcodebuild -list \
             -project "Youtube_Phantom_clone.xcodeproj"
-
-
 
       - name: Build unsigned iOS app
         run: |
@@ -39,7 +37,6 @@ jobs:
             -derivedDataPath "$RUNNER_TEMP/DerivedData" \
             CODE_SIGNING_ALLOWED=NO \
             build
-
 
       - name: Package unsigned IPA
         run: |
