@@ -17,22 +17,53 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Check project syntax and package URL
+      - name: Verify Kingfisher URL
         run: |
           set -euxo pipefail
 
-          echo "=== Project file syntax ==="
-          plutil -lint Youtube_Phantom_clone.xcodeproj/project.pbxproj
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
 
-          echo "=== Exact package reference ==="
-          sed -n '335,355p' Youtube_Phantom_clone.xcodeproj/project.pbxproj
+          project_path = Path(
+              "Youtube_Phantom_clone.xcodeproj/project.pbxproj"
+          )
+          resolved_path = Path(
+              "Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+          )
 
-          echo "=== Package lock file syntax ==="
-          plutil -lint -s -r \
-            Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved \
-            || python3 -m json.tool \
-            Youtube_Phantom_clone.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+          project = project_path.read_text()
+          resolved = json.loads(resolved_path.read_text())
 
-          echo "=== Package reference occurrences ==="
-          grep -n 'repositoryURL' Youtube_Phantom_clone.xcodeproj/project.pbxproj
+          print("=== Project format ===")
+          for line in project.splitlines():
+              if "objectVersion" in line:
+                  print(line.strip())
 
+          print("=== URL in project.pbxproj ===")
+          for line in project.splitlines():
+              if "repositoryURL" in line:
+                  print(repr(line.strip()))
+
+          print("=== URL in Package.resolved ===")
+          for pin in resolved.get("pins", []):
+              if pin.get("identity") == "kingfisher":
+                  print(repr(pin.get("location")))
+                  print("Version:", pin.get("state", {}).get("version"))
+                  print("Revision:", pin.get("state", {}).get("revision"))
+
+          print("=== Project syntax ===")
+          import subprocess
+          subprocess.run(
+              ["plutil", "-lint", str(project_path)],
+              check=True
+          )
+
+          print("=== Package.resolved JSON ===")
+          print("Valid JSON")
+          PY
+
+      - name: Show commit
+        run: |
+          git log -1 --oneline
+          git status --short
