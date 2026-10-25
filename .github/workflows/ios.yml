@@ -23,6 +23,15 @@ jobs:
           sudo xcode-select -s /Applications/Xcode_16.3.app/Contents/Developer
           xcodebuild -version
 
+      
+      - name: Inspect project package references
+        run: |
+          set -euxo pipefail
+          grep -n -E 'objectVersion|XCRemoteSwiftPackageReference|XCSwiftPackageProductDependency|packageProductDependencies|repositoryURL|Kingfisher' \
+            Youtube_Phantom_clone.xcodeproj/project.pbxproj
+          git status --short
+          git log -1 --oneline
+
       - name: Find Xcode scheme
         run: |
           set -euxo pipefail
