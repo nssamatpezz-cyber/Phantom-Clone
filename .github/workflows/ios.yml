@@ -1,4 +1,3 @@
-```yaml
 name: Diagnose iOS Project
 
 on:
@@ -42,4 +41,3 @@ jobs:
 
           echo "=== Working tree ==="
           git status --short
-```
